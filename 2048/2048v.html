@@ -1,0 +1,371 @@
+<!DOCTYPE html >
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+
+	
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312" />
+<title>2048</title>
+	<style>
+		body{
+		overflow:hidden;
+		}
+		
+		#container{
+		width:540px;
+		height:540px;
+		background-color:#bbada0;
+		position: relative;
+   	    border-radius: 20px;
+		margin: 50px auto;
+
+		}
+		.grid{
+		width:110px;
+		height:80px;
+		background-color:#ccc0b3;
+		border-radius:10px;
+		position:absolute;
+		font-family:Arial;
+		font-size:40px;
+		text-align:center;
+		padding-top:30px;
+		}
+		
+	</style>
+</head>
+	
+	<div id="container">
+		<div class="grid" id="grid_0_0" ></div>
+		<div class="grid" id="grid_0_1" ></div>
+		<div class="grid" id="grid_0_2" ></div>
+		<div class="grid" id="grid_0_3" ></div>
+		<div class="grid" id="grid_1_0" ></div>
+		<div class="grid" id="grid_1_1" ></div>
+		<div class="grid" id="grid_1_2" ></div>
+		<div class="grid" id="grid_1_3" ></div>
+		<div class="grid" id="grid_2_0" ></div>
+		<div class="grid" id="grid_2_1" ></div>
+		<div class="grid" id="grid_2_2" ></div>
+		<div class="grid" id="grid_2_3" ></div>
+		<div class="grid" id="grid_3_0" ></div>
+		<div class="grid" id="grid_3_1" ></div>
+		<div class="grid" id="grid_3_2" ></div>
+		<div class="grid" id="grid_3_3" ></div>	
+	</div>
+	
+<script>
+(function init(){
+	panelArray=new Array([4]);
+	for(var i=0;i<4;i++){
+		panelArray[i]=new Array([4]);
+		for(var j=0;j<4;j++){
+			panelArray[i][j]=new Array([2]);
+			panelArray[i][j][0]=0;
+			document.getElementById("grid_"+i+"_"+j).style.top=(20*(i+1)+110*i)+"px";
+			document.getElementById("grid_"+i+"_"+j).style.left=20*(j+1)+110*j+"px";
+			
+		}
+	}
+	//游戏初始，随机两个位置随机产生2或4
+	for(var i=0;i<2;i++){
+		var last_i=initNumLocation_i;
+		do{
+			var initNumLocation_i= Math.floor(Math.random()*4);
+		}while(initNumLocation_i==last_i)//避免两次重叠在一起
+		var initNumLocation_j= Math.floor(Math.random()*4);
+		
+		panelArray[initNumLocation_i][initNumLocation_j][0]=1;
+		var num=createOneNum();
+		panelArray[initNumLocation_i][initNumLocation_j][1]=num;
+		document.getElementById("grid_"+initNumLocation_i+"_"+initNumLocation_j).innerHTML=num;
+		document.getElementById("grid_"+initNumLocation_i+"_"+initNumLocation_j).style.backgroundColor=changeGridColor(num);
+	} 
+	
+	document.onkeydown=function(event){        //event是keydown事件自带的
+   		 switch (event.keyCode){
+      	  case 37://left
+			   moveLeft();
+          	  break;
+      	  case 38://up
+				 moveUp();
+          	  break;
+      	  case 39://right
+				 moveRight();
+         	   break;
+     	   case 40://dowm
+			 moveDown();
+           	 break;
+  		  }
+	};	
+	
+})();
+/*
+*随机产生 数字2或4
+*/
+function createOneNum(){
+	var random=Math.random();
+	return random<0.5?2:4;
+}
+function createNewNum(){
+	do{
+		var new_i=Math.floor(Math.random()*4);	
+		var new_j=Math.floor(Math.random()*4);
+	}while(panelArray[new_i][new_j][0]==1)
+	panelArray[new_i][new_j][0]=1;
+	var num=createOneNum();
+	panelArray[new_i][new_j][1]=num;
+	document.getElementById("grid_"+new_i+"_"+new_j).innerHTML=num;
+	document.getElementById("grid_"+new_i+"_"+new_j).style.backgroundColor=changeGridColor(num);
+	showNewNum(new_i,new_j);
+	/*var time=1;
+	var show=function(){
+		document.getElementById("grid_"+new_i+"_"+new_j).style.width=60+time*10+"px";
+		time++;
+		if(time<6)
+		var timeout=setTimeout(show,20);
+		else clearTimeout(timeout);
+		
+		};
+		show();*/
+	
+}
+	
+function changeGridColor(num){
+	switch (num)
+	{
+		case 2:return "#eee488";break;
+        case 4:return "#eee300";break;
+        case 8:return "#f2b179";break;
+        case 16:return "#f59563";break;
+        case 32:return "#f67c5f";break;
+        case 64:return "#f65e3b";break;
+        case 128:return "#edcf72";break;
+        case 256:return "#edcc61";break;
+        case 512:return "#9c0";break;
+        case 1024:return "#33b5e5";break;
+        case 2048:return "#09c";break;
+        case 4096:return "#a6c";break;
+        case 8192:return "#93c";break;
+	}
+}
+
+
+function moveUp(){
+	var time=1;//函数执行计数，为了关闭 setTimeout
+	var move=function(){
+		for(var j=0;j<4;j++){
+			for(var i=0;i<4;i++){
+				if(panelArray[i][j][0]!=0&&i>0){
+					if(panelArray[i-1][j][0]==0){
+						panelArray[i-1][j][0]=1;
+						panelArray[i-1][j][1]=panelArray[i][j][1];
+						panelArray[i][j][0]=0;
+					}
+					else if(panelArray[i-1][j][1]==panelArray[i][j][1])
+					{
+						panelArray[i-1][j][1]=panelArray[i-1][j][1]+panelArray[i][j][1];
+						panelArray[i][j][0]=0;
+					}
+					
+				}else continue;
+			}
+			
+		}
+		update();
+		if(time<4){
+			time++;
+			var timeout=setTimeout(move,50);
+		}
+		else {
+			clearTimeout(timeout);
+			if(!checkGameOver())
+			createNewNum();
+		}
+		
+	}
+	move();//启动匿名函数
+}
+
+function moveDown(){
+	var time=1;//函数执行计数，为了关闭 setTimeout
+	var move=function(){
+		for(var j=0;j<4;j++){
+			for(var i=3;i>=0;i--){
+				if(panelArray[i][j][0]!=0&&i<3){
+					if(panelArray[i+1][j][0]==0){
+						panelArray[i+1][j][0]=1;
+						panelArray[i+1][j][1]=panelArray[i][j][1];
+						panelArray[i][j][0]=0;
+					}
+					else if(panelArray[i+1][j][1]==panelArray[i][j][1])
+					{
+						panelArray[i+1][j][1]=panelArray[i+1][j][1]+panelArray[i][j][1];
+						panelArray[i][j][0]=0;
+					}
+					
+				}else continue;
+			}
+			
+		}
+		update();
+		if(time<4){
+			time++;
+			var timeout=setTimeout(move,50);
+		}
+		else {
+			clearTimeout(timeout);
+			if(!checkGameOver())
+			createNewNum();
+		}
+		
+	}
+	move();//启动匿名函数
+}
+
+
+function moveLeft(){
+	var time=1;//函数执行计数，为了关闭 setTimeout
+	var move=function(){
+		for(var i=0;i<4;i++){
+			for(var j=0;j<4;j++){
+				if(panelArray[i][j][0]!=0&&j>0){//前面一格不是数字的话就 往前移动一格
+					if(panelArray[i][j-1][0]==0){
+						panelArray[i][j-1][0]=1;
+						panelArray[i][j-1][1]=panelArray[i][j][1];
+						panelArray[i][j][0]=0;
+					}else if(panelArray[i][j-1][1]==panelArray[i][j][1])
+					{
+						panelArray[i][j-1][1]=panelArray[i][j-1][1]+panelArray[i][j][1];
+						panelArray[i][j][0]=0;
+					}
+					
+				}else continue;
+			}
+			
+		}
+		update();
+		if(time<4){
+			time++;
+			var timeout=setTimeout(move,50);
+		}
+		else {
+			clearTimeout(timeout);
+			if(!checkGameOver())
+			createNewNum();
+		}
+		
+	}
+	move();//启动匿名函数
+}
+
+function moveRight(){
+	
+	var time=1;//函数执行计数，为了关闭 setTimeout
+	var move=function(){
+		for(var i=0;i<4;i++){
+			for(var j=3;j>=0;j--){
+				if(panelArray[i][j][0]!=0&&j<3){
+					if(panelArray[i][j+1][0]==0){
+						panelArray[i][j+1][0]=1;
+						panelArray[i][j+1][1]=panelArray[i][j][1];
+						panelArray[i][j][0]=0;
+					}
+					else if(panelArray[i][j+1][1]==panelArray[i][j][1])
+							{
+								panelArray[i][j+1][1]=panelArray[i][j][1]+panelArray[i][j+1][1];
+								panelArray[i][j][0]=0;
+							}
+					
+				}else continue;
+			}
+			
+		}
+		update();
+		if(time<4){
+			time++;
+			var timeout=setTimeout(move,50);
+		}
+		else {
+			clearTimeout(timeout);
+			if(!checkGameOver())
+			createNewNum();
+		}
+		
+	}
+	move();//启动匿名函数
+}
+
+
+
+
+/*
+*这个跟新方法 是我实现游戏效果的关键啊！！得意！！
+*/
+function update(){
+	for(var i=0;i<4;i++){
+		for(var j=0;j<4;j++){
+			if(panelArray[i][j][0]!=0){
+				document.getElementById("grid_"+i+"_"+j).innerHTML=panelArray[i][j][1];
+				document.getElementById("grid_"+i+"_"+j).style.backgroundColor=changeGridColor(panelArray[i][j][1]);
+				
+			}else{
+				document.getElementById("grid_"+i+"_"+j).style.backgroundColor="#ccc0b3";
+				document.getElementById("grid_"+i+"_"+j).innerHTML="";
+			}
+		}
+
+	}
+		
+}
+
+
+
+function checkGameOver(){
+	var count_1=0;
+	for(var i=0;i<4;i++)
+		for(var j=0;j<4;j++)
+			if(panelArray[i][j][0]==1)
+				count_1++;
+	if(count_1==16){
+		document.onkeydown=function(){};
+		alert("Game Over!!");
+		return true;
+	}
+	else return false;
+}
+
+
+
+
+function reStart(){
+	init();
+	checkGameOver();
+	
+	}
+	
+	
+/*
+*实现一定的动画效果
+*/
+function showNewNum(new_i,new_j){
+	var time=1;
+	var show=function(){
+		document.getElementById("grid_"+new_i+"_"+new_j).style.left=(20*(new_j+1)+110*new_j)+1/2*(110-(60+time*10))+"px";
+		document.getElementById("grid_"+new_i+"_"+new_j).style.top=(20*(new_i+1)+110*new_i)+1/2*(110-(60+time*10))+"px";
+		
+		document.getElementById("grid_"+new_i+"_"+new_j).style.width=60+time*10+"px";
+		document.getElementById("grid_"+new_i+"_"+new_j).style.height=30+time*10+"px";
+		time++;
+		if(time<6)
+		var timeout=setTimeout(show,25);
+		else clearTimeout(timeout);
+		
+		}
+		show();
+	
+}
+</script>
+
+<body>
+</body>
+</html>
